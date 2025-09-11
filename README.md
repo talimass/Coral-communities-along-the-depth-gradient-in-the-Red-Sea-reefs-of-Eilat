@@ -4,4 +4,4 @@ This study explores the structure and resilience of coral reef ecosystems in the
 
 ###All photoquadrat images can be found in [CoralNet] (https://coralnet.ucsd.edu) 
 
- ![Schematic 1](/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output/FIRe.jpeg) 
+ ![Schematic 1](Reanalysis/Output/FIRe.jpeg) 
