@@ -4,5 +4,5 @@ This study explores the structure and resilience of coral reef ecosystems in the
 
 ###All photoquadrat images can be found in [CoralNet] (https://coralnet.ucsd.edu) 
 
- ![Schematic 1](Reanalysis/Output/Combos SITE + DEPTH pics.jpg) 
+ ![Schematic 1](Reanalysis/Output/For_readme.jpg) 
 
