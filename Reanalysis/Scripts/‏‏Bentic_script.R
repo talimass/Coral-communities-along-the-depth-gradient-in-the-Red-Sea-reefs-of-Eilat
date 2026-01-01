@@ -147,6 +147,105 @@ ggsave(
   height = 6
 )
 
+
+###### live coral proportion differs among sites Kruskal–Wallis 
+
+
+
+## ---- Libraries (quiet load optional) ----
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+})
+
+## You can either load FSA quietly OR not load it at all and just call FSA::dunnTest
+suppressPackageStartupMessages(library(FSA))   # optional
+
+## ---- Data checks ----
+# Make sure SITE is a factor
+live$SITE <- as.factor(live$SITE)
+
+# Optional: drop missing values
+live2 <- live %>%
+  filter(!is.na(prop), !is.na(SITE))
+
+# Sample sizes per site
+print(table(live2$SITE))
+
+## ---- 1) Overall test: Kruskal–Wallis ----
+kw_site <- kruskal.test(prop ~ SITE, data = live2)
+print(kw_site)
+
+## ---- 2) Post hoc: Dunn test with multiple-comparison correction ----
+# Choose method = "bh" (FDR) or "bonferroni"
+dunn_site <- FSA::dunnTest(prop ~ SITE, data = live2, method = "bh")
+print(dunn_site)
+
+# Save Dunn results as a data frame (nice for reporting/export)
+dunn_df <- dunn_site$res
+print(dunn_df)
+
+## ---- Optional: Save the stats table to CSV ----
+output_path <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
+if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
+
+write.csv(dunn_df,
+          file = file.path(output_path, "Dunn_posthoc_SITE_live_prop.csv"),
+          row.names = FALSE)
+
+
+
+# Calculate median and quartiles
+live_summary <- live %>%
+  group_by(SITE) %>%
+  summarise(
+    n = n(),
+    median_cover = median(prop, na.rm = TRUE),
+    Q1 = quantile(prop, 0.25, na.rm = TRUE),
+    Q3 = quantile(prop, 0.75, na.rm = TRUE)
+  )
+
+# View results
+print(live_summary)
+
+# Define output directory (same one you used before)
+output_path <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
+if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
+
+# Save to CSV
+write.csv(
+  live_summary,
+  file = file.path(output_path, "LiveCoverage_median_quartiles_by_SITE.csv"),
+  row.names = FALSE
+)
+
+
+
+
+p_density_overall <- ggplot(live, aes(x = prop)) +
+  geom_density(
+    fill = "grey60",
+    colour = "black",
+    alpha = 0.6,
+    linewidth = 0.8
+  ) +
+  theme_bw() +
+  labs(
+    x = "Live coral proportion",
+    y = "Density"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 14),
+    axis.text  = element_text(size = 12),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+print(p_density_overall)
+
+
+
 ########## Density plots for live prop by depth:
 
 p_dens_depth <- ggplot(data = live, aes(x = prop, fill = DEPTH)) +
@@ -187,8 +286,12 @@ ggsave(
 # Required packages: install.packages("ARTool"), install.packages("emmeans"), install.packages("multcomp")
 # and: install.packages("rcompanion"), install.packages("ggplot2"), install.packages("psych")
 
+library(ARTool)
+
 ### Aligned ranks anova:
-model_live = art(prop ~ DEPTH,  data = live)
+model_live <- art(prop ~ DEPTH, data = live)
+anova(model_live)
+
 ### Check the success of the procedure:
 model_live
 
@@ -197,11 +300,11 @@ anova(model_live)
 
 
 
-
 # Posthoc pairwise comparison for DEPTH:
 DEPTH_posthoc = art.con(model_live, "DEPTH")
 DEPTH_posthoc
 Sum_DEPTH = as.data.frame(DEPTH_posthoc)
+
 # Finding the statistical group letter: 
 live_depth_stat_letters=as.data.frame (cldList(p.value ~ contrast, data=Sum_DEPTH))
 
