@@ -221,31 +221,6 @@ write.csv(
 
 
 
-
-p_density_overall <- ggplot(live, aes(x = prop)) +
-  geom_density(
-    fill = "grey60",
-    colour = "black",
-    alpha = 0.6,
-    linewidth = 0.8
-  ) +
-  theme_bw() +
-  labs(
-    x = "Live coral proportion",
-    y = "Density"
-  ) +
-  theme(
-    legend.position = "none",
-    axis.title = element_text(size = 14),
-    axis.text  = element_text(size = 12),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-print(p_density_overall)
-
-
-
 ########## Density plots for live prop by depth:
 
 p_dens_depth <- ggplot(data = live, aes(x = prop, fill = DEPTH)) +
@@ -815,269 +790,6 @@ ggsave(
 
 ################# HARD CORALS 100% stacked bar plot:
 
-
-setwd("/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Data")
-Hard_corals_plot<-read.csv('Hard_corals_plot.csv',header=TRUE, stringsAsFactors = TRUE)
-str(Hard_corals_plot) 
-
-######## Hard Corals plotting using library(ggplot2), library(reshape2):
-
-# because we do not really want to tread depth as continuous value, 
-# we will change it to be treated as factor:
-Hard_corals_plot$Depth=as.factor(Hard_corals_plot$Depth)
-
-# Reorder Site levels to "JG" at the top, "IUI-N" in the middle, "IUI-S" at the bottom
-Hard_corals_plot$Site <- factor(Hard_corals_plot$Site, levels = c("JG", "IUI-N", "IUI-S"))
-
-# Melt the data frame to long format for ggplot
-Hard_corals_plot_long <- melt(Hard_corals_plot, id.vars = c("Site", "Depth"), variable.name = "Category", value.name = "Percentage")
-
-# To change HC colors on plot using: library(RColorBrewer)
-# Generate 44 distinct colors using the (RColorBrewer) package
-# library(RColorBrewer)
-num_colors <- 44
-color_palette <- colorRampPalette(brewer.pal(12, "Paired"))(num_colors)
-
-# Reverse the order of the Category factor (the corals in the plot):
-# library(forcats)
-# HC_df_long$Category <- fct_rev(HC_df_long$Category)
-
-# Create 100% stacked bar plot:
-HC_plot <- ggplot(Hard_corals_plot_long, aes(x = Percentage, y = Depth, fill = Category)) +
-  geom_bar(stat = "identity", position = "fill", width = 0.6) + 
-  facet_grid(Site ~ ., scales = "free_y") +
-  scale_x_continuous(labels = percent_format(accuracy = 1)) +  # Change x-axis labels to percentage
-  theme_bw() +
-  labs(x = "Percentage", y = "Depth (m)", fill = "Hard Corals") + # Add axes and legend titles
-  scale_y_discrete(limits = rev(levels(df_long$Depth))) + # Depth from shallow to deep
-  scale_fill_manual(values = color_palette) +  # Use the generated color palette  
-  theme(axis.title.x = element_text(colour="Black", size=16),
-        axis.title.y = element_text(colour="Black", size=16),
-        axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        legend.title = element_text(size=16), 
-        legend.text = element_text(size=10),
-        legend.position = "right",
-        strip.background = element_blank(),
-        strip.text = element_text(size = 18)) +
-  guides(fill = guide_legend(ncol = 2))  # Arrange legend items in one or two columns
-print(HC_plot)
-
-
-
-
-
-################ 7 Hard corals heat map: 
-
-# Loading data of 7 selected HC for the heat map:
-HC_Heatmap<-read.csv("HC_Heatmap.csv", header=TRUE, stringsAsFactors = TRUE)
-setwd("/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Data")
-HC_Heatmap$DEPTH=as.factor(HC_Heatmap$DEPTH) # setting depth as factor
-HC_Heatmap$Site_Depth=paste(HC_Heatmap$SITE, HC_Heatmap$DEPTH, sep="_") # adding Site_Depth column
-HC_Heatmap$SITE <- factor(HC_Heatmap$SITE, levels = c("IUI-S", "IUI-N", "JG")) # Reorder SITE factor levels
-
-str(HC_Heatmap)
-
-# Heat map of 7 corals with preferred order of corals & sites:
-HC_heatmap <- ggplot(HC_Heatmap, aes(x=DEPTH, y=reorder(Coral,Order), fill=Prevalence)) +
-  geom_tile() + 
-  facet_grid(.~SITE, scales = "free", space = "free") +
-scale_fill_viridis(option = "G") + # Use a viridis palette "G" for blue chosen colors
-xlab("Depth (M)") + ylab("Corals") +
-theme(axis.title.x = element_text(colour="Black", size=16),
-      axis.title.y = element_text(colour="Black", size=16),
-      axis.text.x = element_text(size=14),
-      axis.text.y = element_text(size=14),
-      legend.title = element_text(size=14), 
-      legend.text = element_text(size=14),
-      strip.text = element_text(size = 18) # Increase font size of facet labels
-) 
-print(HC_heatmap)
-
-#### Heat map of 7 corals with preferred order of corals & depth
-library(ggplot2)
-library(viridis)
-
-# Load data
-HC_Heatmap <- read.csv("HC_Heatmap.csv", header = TRUE, stringsAsFactors = TRUE)
-
-# Set working directory (if needed)
-setwd("/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Data")
-
-# Set depth as factor
-HC_Heatmap$DEPTH <- as.factor(HC_Heatmap$DEPTH)
-
-# OPTIONAL: reorder DEPTH levels if needed (example: shallow to deep)
-# HC_Heatmap$DEPTH <- factor(HC_Heatmap$DEPTH, levels = c("5","15","25","35","45"))
-
-str(HC_Heatmap)
-
-# ---- Heatmap by DEPTH only ----
-HC_heatmap <- ggplot(
-  HC_Heatmap,
-  aes(x = DEPTH, y = reorder(Coral, Order), fill = Prevalence)
-) +
-  geom_tile() +
-  scale_fill_viridis(option = "G") +
-  xlab("Depth (m)") +
-  ylab("Corals") +
-  theme_bw() +
-  theme(
-    axis.title.x = element_text(colour = "Black", size = 16),
-    axis.title.y = element_text(colour = "Black", size = 16),
-    axis.text.x  = element_text(size = 14),
-    axis.text.y  = element_text(size = 14),
-    legend.title = element_text(size = 14),
-    legend.text  = element_text(size = 14)
-  )
-
-print(HC_heatmap)
-
-output_path <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
-if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
-
-ggsave(
-  filename = file.path(output_path, "HC_heatmap_depth.png"),
-  plot = HC_heatmap,
-  width = 10,
-  height = 5,
-  dpi = 300,
-  bg = "white"
-)
-
-ggsave(
-  filename = file.path(output_path, "HC_heatmap_depth.pdf"),
-  plot = HC_heatmap,
-  width = 10,
-  height = 5
-)
-
-############# HARD CORALS composition:
-#Seperate to 2 plots
--------------------
-  ## ---- Libraries ----
-library(ggplot2)
-library(reshape2)
-library(RColorBrewer)
-library(scales)
-library(cowplot)
-library(grid)
-
-## ---- Output folder (PDFs will be saved here) ----
-output_dir <- "/Users/talimass/Library/CloudStorage/GoogleDrive-cbp@marsci.haifa.ac.il/Shared drives/CSMS_CBP_MassLab/Tamar Shifroni/Thesis/Plots_SVG"
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
-## ---- Data prep ----
-Hard_corals_plot$Depth <- as.factor(Hard_corals_plot$Depth)
-
-Hard_corals_plot$Site <- factor(Hard_corals_plot$Site,
-                                levels = c("JG", "IUI-N", "IUI-S"))
-
-Hard_corals_plot_long <- melt(Hard_corals_plot,
-                              id.vars = c("Site", "Depth"),
-                              variable.name = "Category",
-                              value.name = "Percentage")
-
-## ---- Colors ----
-num_colors <- length(unique(Hard_corals_plot_long$Category))
-color_palette <- colorRampPalette(brewer.pal(12, "Paired"))(num_colors)
-
-## ---- Depth order (shallow to deep) ----
-depth_levels <- levels(Hard_corals_plot_long$Depth)
-
-## ---- Base plot (legend formatted for LANDSCAPE export) ----
-HC_plot <- ggplot(Hard_corals_plot_long,
-                  aes(x = Percentage, y = Depth, fill = Category)) +
-  geom_bar(stat = "identity", position = "fill", width = 0.6) +
-  facet_grid(Site ~ ., scales = "free_y") +
-  scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  scale_y_discrete(limits = rev(depth_levels)) +
-  scale_fill_manual(values = color_palette) +
-  theme_bw() +
-  labs(x = "Percentage", y = "Depth (m)", fill = NULL) +
-  theme(
-    axis.title.x = element_text(size = 9, colour = "black"),
-    axis.title.y = element_text(size = 9, colour = "black"),
-    axis.text.x  = element_text(size = 8),
-    axis.text.y  = element_text(size = 8),
-    strip.background = element_blank(),
-    strip.text = element_text(size = 9),
-    
-    legend.position  = "bottom",
-    legend.direction = "horizontal",
-    legend.title = element_blank(),   # ⬅️ no legend title
-    legend.text  = element_text(size = 7)
-  ) +
-  guides(fill = guide_legend(ncol = 6, byrow = TRUE))
-
-
-## ---- Extract LEGEND robustly (handles multiple guide-box components) ----
-leg_list <- get_plot_component(HC_plot, "guide-box", return_all = TRUE)
-
-legend_grob <- NULL
-for (i in seq_along(leg_list)) {
-  g <- leg_list[[i]]
-  if (!is.null(g) && inherits(g, "grob")) {
-    # A quick test for "non-empty": has child grobs
-    if (!is.null(g$grobs) && length(g$grobs) > 0) {
-      legend_grob <- g
-      break
-    }
-  }
-}
-if (is.null(legend_grob)) legend_grob <- leg_list[[length(leg_list)]]
-
-# Convert legend grob into a plot that ggsave can write reliably
-legend_plot <- cowplot::ggdraw() + cowplot::draw_grob(legend_grob)
-
-## ---- Main plot without legend ----
-HC_plot_no_legend <- HC_plot + theme(legend.position = "none")
-
-## ---- Save PDFs ----
-
-# 1) Main plot: single journal column (narrow)
-
-ggsave(
-  filename = file.path(output_path, "HardCorals_main_single_column.png"),
-  plot =HC_plot_no_legend,
-  width = 10,
-  height = 12,
-  dpi = 300,
-  bg = "white"
-)
-
-ggsave(
-  filename = file.path(output_path, "HardCorals_main_single_column.pdf"),
-  plot = HC_plot_no_legend,
-  width = 10,
-  height = 12
-)
-
-# 2) Legend only: landscape (wide + short)
-
-
-ggsave(
-  filename = file.path(output_path, "HardCorals_legend_landscape.png"),
-  plot =legend_grob,
-  width = 10,
-  height = 12,
-  dpi = 300,
-  bg = "white"
-)
-
-ggsave(
-  filename = file.path(output_path, "HardCorals_legend_landscape.pdf"),
-  plot = legend_grob,
-  width = 10,
-  height = 12
-)
-
-
-## ---- Optional: preview ----
-print(HC_plot_no_legend)
-grid.newpage(); grid.draw(legend_grob)   # preview legend grob
-print(legend_plot)                       # preview legend plot
-
 ##########HC by depth only
 
 library(ggplot2)
@@ -1158,14 +870,8 @@ print(HC_plot_no_legend)
 grid.newpage(); grid.draw(legend_grob)   # preview legend grob
 print(legend_plot)                       # preview legend plot
 
-###
 
-
-
-
-
-
-## ---- Output folder (PDFs will be saved here) ----
+## ---- Output folder
 output_dir <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
@@ -1211,28 +917,127 @@ ggsave(
 
 
 
+
+
+#### Heat map of 7 corals with preferred order of corals & depth
+library(ggplot2)
+library(viridis)
+
+# Load data
+HC_Heatmap <- read.csv("HC_Heatmap.csv", header = TRUE, stringsAsFactors = TRUE)
+
+# Set working directory (if needed)
+setwd("/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Data")
+
+# Set depth as factor
+HC_Heatmap$DEPTH <- as.factor(HC_Heatmap$DEPTH)
+
+# OPTIONAL: reorder DEPTH levels if needed (example: shallow to deep)
+# HC_Heatmap$DEPTH <- factor(HC_Heatmap$DEPTH, levels = c("5","15","25","35","45"))
+
+str(HC_Heatmap)
+
+# ---- Heatmap by DEPTH only ----
+HC_heatmap <- ggplot(
+  HC_Heatmap,
+  aes(x = DEPTH, y = reorder(Coral, Order), fill = Prevalence)
+) +
+  geom_tile() +
+  scale_fill_viridis(option = "G") +
+  xlab("Depth (m)") +
+  ylab("Corals") +
+  theme_bw() +
+  theme(
+    axis.title.x = element_text(colour = "Black", size = 16),
+    axis.title.y = element_text(colour = "Black", size = 16),
+    axis.text.x  = element_text(size = 14),
+    axis.text.y  = element_text(size = 14),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 14)
+  )
+
+print(HC_heatmap)
+
+output_path <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
+if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
+
+ggsave(
+  filename = file.path(output_path, "HC_heatmap_depth.png"),
+  plot = HC_heatmap,
+  width = 10,
+  height = 5,
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  filename = file.path(output_path, "HC_heatmap_depth.pdf"),
+  plot = HC_heatmap,
+  width = 10,
+  height = 5
+)
+
+                   
+
+
+
+
+
+
+############# Create metadata table for images using library(vegan): 
+str(data_all)
+metadata=unique(data_all[,1:3])
+#write.csv(metadata, "metadata.csv")
+
+# Order the names (photos) in 2 DF's the same by creating the 'ord' vector:
+row.names(metadata)=metadata$PIC
+ord=match(colnames(data_all_image_wide), row.names(metadata))
+metadata=metadata[ord,]
+
+
+
+#### get_hart corals only
+str(data_all)
+
+Hard_corals_all=data_all[data_all$GROUP=="Hard Coral",-c(6)]
+str(Hard_corals_all)
+
+Hard_corals_image=aggregate(Count~PIC+SITE+DEPTH+LABEL_corrected, data=Hard_corals_all, FUN="sum")
+str(Hard_corals_image)
+
+Hard_corals_image_wide=as.data.frame(Hard_corals_image[,c(1,4,5)] %>%
+                                       pivot_wider(names_from = LABEL_corrected, values_from = Count, values_fill=0))
+
+
+row.names(Hard_corals_image_wide)=Hard_corals_image_wide$PIC
+Hard_corals_image_wide=as.data.frame(t(Hard_corals_image_wide[,-1]))
+str(Hard_corals_image_wide)
+
+### count no. of observations of Hard corals per image and add as column to metadata
+
+metadata$Site_Depth=paste(metadata$SITE, metadata$DEPTH, sep="_")
+metadata$HC_counts=colSums(Hard_corals_image_wide)
+str(metadata)
+
+
+
 ##### calculate LDM 
-
-########### Hard corals beta diversity statistics:
-
-# Hellinger normalization:
 Hard_corals_image_wide_hell=decostand(Hard_corals_image_wide, method="hellinger", MARGIN=2)
-
-# install.packages("LDM")
-#devtools::install_github("yijuanhu/LDM", build_vignettes=TRUE)
 
 library(LDM)
 
 str(metadata)
 library(dplyr)
 library(stringr)
-#metadata <-  metadata %>% 
-  #mutate(start_location = str_replace(start_location, "-", "_"))
+
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+# install.packages("BiocManager")
+#BiocManager::install("BiocParallel")
+#install.packages("LDM")   # or BiocManager::install("LDM") if needed
+#library(LDM)
 
 
 Hard_corals_image_wide_hell_t=as.data.frame(t(Hard_corals_image_wide_hell))
-
-colSums(Hard_corals_image_wide_hell_t > 0)
 
 Hard_corals_image_wide_hell_t_filter=Hard_corals_image_wide_hell_t[,colSums(Hard_corals_image_wide_hell_t > 0)>10]
 
@@ -1240,38 +1045,73 @@ Hard_corals_image_wide_hell_t_filter=Hard_corals_image_wide_hell_t[,colSums(Hard
 HC_LDM=ldm(formula=Hard_corals_image_wide_hell_t_filter~DEPTH, 
            data=metadata, seed=12345, test.omni3 = TRUE, verbose=TRUE)
 
-Hard_corals_covariates_global=as.data.frame(cbind(HC_LDM$p.global.freq,HC_LDM$p.global.tran, HC_LDM$p.global.pa,
-                                                  HC_LDM$p.global.omni, HC_LDM$p.global.omni3))
-colnames(Hard_corals_covariates_global)=c("freq","tran","pa","omni","omni3")
 
-row.names(Hard_corals_covariates_global)=c("DEPTH","SITE")
+Hard_corals_covariates_global=as.data.frame(cbind(HC_LDM$p.global.freq,HC_LDM$p.global.pa))
 
-HC_LDM_res= as.data.frame(rbind(HC_LDM$p.otu.omni3, HC_LDM$q.otu.omni3,
-                                HC_LDM$p.otu.omni, HC_LDM$q.otu.omni,
-                                HC_LDM$F.otu.pa,HC_LDM$p.otu.pa, HC_LDM$q.otu.pa,
-                                HC_LDM$F.otu.tran,HC_LDM$p.otu.tran, HC_LDM$q.otu.tran,
+colnames(Hard_corals_covariates_global)=c("freq","pa")
+
+row.names(Hard_corals_covariates_global)=c("DEPTH")
+
+
+HC_LDM_res= as.data.frame(rbind(HC_LDM$F.otu.pa,HC_LDM$p.otu.pa, HC_LDM$q.otu.pa,
                                 HC_LDM$F.otu.freq, HC_LDM$p.otu.freq, HC_LDM$q.otu.freq))
 
-vector_names=c("DEPTH_p.otu.omni3", "SITE_p.otu.omni3", 
-               "DEPTH_q.otu.omni3","SITE_q.otu.omni3",
-               "DEPTH_p.otu.omni","SITE_p.otu.omni",
-               "DEPTH_q.otu.omni","SITE_q.otu.omni",
-               "DEPTH_F.otu.pa","SITE_F.otu.pa",
-               "DEPTH_p.otu.pa","SITE_p.otu.pa",
-               "DEPTH_q.otu.pa","SITE_q.otu.pa",
-               "DEPTH_F.otu.tran","SITE_F.otu.tran",
-               "DEPTH_p.otu.tran","SITE_p.otu.tran",
-               "DEPTH_q.otu.tran","SITE_q.otu.tran",
-               "DEPTH_F.otu.freq","SITE_F.otu.freq",
-               "DEPTH_p.otu.freq","SITE_p.otu.freq",
-               "DEPTH_q.otu.freq","SITE_q.otu.freq")
+
+vector_names=c("DEPTH_F.otu.pa",
+               "DEPTH_p.otu.pa",
+               "DEPTH_q.otu.pa",
+               "DEPTH_F.otu.freq",
+               "DEPTH_p.otu.freq",
+               "DEPTH_q.otu.freq")
 
 row.names(HC_LDM_res)=vector_names
 
 #MSRS_noldm_res$comparison=paste("MSRS_LDM")
-#colnames(MSRS_noldm_res)=c("p.otu.omni3", "q.otu.omni3","p.otu.omni", "q.otu.omni","p.otu.pa", "q.otu.pa","p.otu.tran",
-# "q.otu.tran","variable")
+#colnames(MSRS_noldm_res)=c("p.otu.omni3", "q.otu.omni3","p.otu.omni", "q.otu.omni","p.otu.pa", "q.otu.pa","p.otu.tran", "q.otu.tran","variable")
 str(HC_LDM_res)
 HC_LDM_res_t=as.data.frame(t(HC_LDM_res))
 
+
 write.csv(HC_LDM_res_t,"LDM_HC_res.csv")
+
+
+#### HC_relative abundances by depth (from total live coverage)
+
+str(Hard_corals_image)
+row.names(Hard_corals_image_wide)
+
+Hard_corals_image_stats=as.data.frame(Hard_corals_image %>%
+                                        group_by(LABEL_corrected, DEPTH) %>%
+                                        summarise(count=sum(Count),
+                                                  prevalence=sum(Count != 0)))
+
+
+# total counts live by depth
+str(data_all)
+
+live_by_depth= data_all[data_all$Live_Non_live=="Live",] %>%
+  group_by(DEPTH) %>%
+  summarise(Total_live=sum(Count))
+
+str(Hard_corals_image_stats)
+Hard_corals_image_stats$Live_total=live_by_depth$Total_live[match(Hard_corals_image_stats$DEPTH,live_by_depth$DEPTH )]
+
+Hard_corals_image_stats$Percent_of_Live=Hard_corals_image_stats$count/Hard_corals_image_stats$Live_total*100
+
+Hard_corals_depth_percent_live=pivot_wider(Hard_corals_image_stats[,c(1,2,6)],
+                                           names_from = "DEPTH",
+                                           values_from = "Percent_of_Live",
+                                           values_fill = list(value = 0))
+str(Hard_corals_depth_percent_live)
+colnames(Hard_corals_depth_percent_live)=c("LABEL_corrected", "m5", "m15", "m25", "m35", "m45")
+
+HC_LDM_res_t$D5=Hard_corals_depth_percent_live$m5[match(row.names(HC_LDM_res_t),Hard_corals_depth_percent_live$LABEL_corrected )]
+HC_LDM_res_t$D15=Hard_corals_depth_percent_live$m15[match(row.names(HC_LDM_res_t),Hard_corals_depth_percent_live$LABEL_corrected )]
+HC_LDM_res_t$D25=Hard_corals_depth_percent_live$m25[match(row.names(HC_LDM_res_t),Hard_corals_depth_percent_live$LABEL_corrected )]
+HC_LDM_res_t$D35=Hard_corals_depth_percent_live$m35[match(row.names(HC_LDM_res_t),Hard_corals_depth_percent_live$LABEL_corrected )]
+HC_LDM_res_t$D45=Hard_corals_depth_percent_live$m45[match(row.names(HC_LDM_res_t),Hard_corals_depth_percent_live$LABEL_corrected )]
+
+str(HC_LDM_res_t)
+
+
+write.csv(HC_LDM_res_t,"/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output/HC_LDM_res_t.csv")

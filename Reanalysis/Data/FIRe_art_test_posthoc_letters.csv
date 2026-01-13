@@ -1,0 +1,14 @@
+"","Species","variable","DEPTH25","DEPTH35","DEPTH45","DEPTH15","DEPTH5"
+"1","Leptoseris","fv_fm","a","a","b",NA,NA
+"2","Leptoseris","p","a","b","a",NA,NA
+"3","Leptoseris","Pmax","a","b","a",NA,NA
+"4","Pocillopora","fv_fm","a",NA,NA,"b","a"
+"5","Pocillopora","p","b",NA,NA,"a","a"
+"6","Pocillopora","Pmax","ab",NA,NA,"b","a"
+"7","Porites","fv_fm","a","b","b","a","a"
+"8","Porites","p","ab","ab","b","a","ab"
+"9","Porites","Pmax","b","b","b","ab","a"
+"10","Stylophora","fv_fm","b","c","c","ab","a"
+"11","Stylophora","p","b","ac","bc","a","abc"
+"12","Stylophora","Pmax","bc","cd","d","b","a"
+"13","Stylophora","Sigma","b","b","ab","ab","a"

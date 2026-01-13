@@ -1,0 +1,17 @@
+Species,variable,df,statistic,p.value
+Leptoseris,fv_fm,2,25.36,6.61E-07
+Leptoseris,p,2,9.12,9.70E-04
+Leptoseris,Pmax,2,6.33,1.04E-02
+Leptoseris,Sigma,2,0.85,4.38E-01
+Pocillopora,fv_fm,2,9.25,5.69E-04
+Pocillopora,p,2,7.57,1.78E-03
+Pocillopora,Pmax,2,3.70,3.40E-02
+Pocillopora,Sigma,2,2.78,7.52E-02
+Porites,fv_fm,4,15.19,5.02E-09
+Porites,p,4,2.84,3.05E-02
+Porites,Pmax,4,7.63,3.54E-05
+Porites,Sigma,4,1.82,1.33E-01
+Stylophora,fv_fm,4,17.42,4.01E-10
+Stylophora,p,4,7.22,5.67E-05
+Stylophora,Pmax,4,31.22,2.77E-15
+Stylophora,Sigma,4,4.72,1.90E-03
