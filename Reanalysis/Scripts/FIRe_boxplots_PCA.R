@@ -374,7 +374,7 @@ p_fire <- ggplot(FIRe_ave_long_no_out, aes(x = as.factor(DEPTH), y = responses))
     vjust = 0
   ) +
   facet_grid(variable~Species, scales = "free") +
-  labs(x = "DEPTH", y = "responses")+
+  labs(x = "Depth", y = "Responses")+
   facetted_pos_scales(
     y = list(
       variable == "fv_fm" ~ scale_y_continuous(limits = c(0, 0.8)),
@@ -384,10 +384,10 @@ p_fire <- ggplot(FIRe_ave_long_no_out, aes(x = as.factor(DEPTH), y = responses))
     )
   )+
   theme_bw()+
-  theme(axis.title.x = element_text(colour="Black", size=14),
-        axis.title.y = element_text(colour="Black", size=14),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
+  theme(axis.title.x = element_text(colour="Black", size=16),
+        axis.title.y = element_text(colour="Black", size=16),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
         panel.grid.major = element_blank(), # Remove major grid lines
         panel.grid.minor = element_blank()  # Remove minor grid lines
   )

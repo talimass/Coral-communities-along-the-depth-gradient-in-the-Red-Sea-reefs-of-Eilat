@@ -120,12 +120,12 @@ p_dens <-ggplot(data = live, aes(x = prop, fill = SITE)) +
   ylim(0,3.8) + # change limit of y axis
   # ggtitle("Density plot of live proportion by site") +
   xlab("Live proportion") + ylab("Density") +
-  theme(axis.title.x = element_text(colour="Black", size=14),
-        axis.title.y = element_text(colour="Black", size=14),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.title = element_text(size=14), 
-        legend.text = element_text(size=14),
+  theme(axis.title.x = element_text(colour="Black", size=16),
+        axis.title.y = element_text(colour="Black", size=16),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        legend.title = element_text(size=16), 
+        legend.text = element_text(size=16),
         legend.position = c(1,1), # legend position in the top right of plot area
         legend.justification = c(1,1), # legend position inside the plot area
     panel.grid.major = element_blank(), # Remove major grid lines
@@ -230,12 +230,12 @@ p_dens_depth <- ggplot(data = live, aes(x = prop, fill = DEPTH)) +
   ylim(0,3.8) + # change limit of y axis
   # ggtitle("Density plot of live proportion by depth") +
   xlab("Live proportion") + ylab("Density") +
-  theme(axis.title.x = element_text(colour="Black", size=14),
-        axis.title.y = element_text(colour="Black", size=14),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.title = element_text(size=14), 
-        legend.text = element_text(size=14),
+  theme(axis.title.x = element_text(colour="Black", size=16),
+        axis.title.y = element_text(colour="Black", size=16),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        legend.title = element_text(size=12), 
+        legend.text = element_text(size=12),
         legend.position = c(1,1), # legend position in the top right of plot area
         legend.justification = c(1,1), # legend position inside the plot area
         panel.grid.major = element_blank(), # Remove major grid lines
@@ -398,8 +398,8 @@ ggsave(
 library(cowplot)
 
 # Optional: remove legends if not needed
-p_dens        <- p_dens        + theme(legend.position = "none")
-p_dens_depth  <- p_dens_depth  + theme(legend.position = "none")
+p_dens        <- p_dens        + theme(legend.position = "right")
+p_dens_depth  <- p_dens_depth  + theme(legend.position = "right")
 # keep legend for p_groups_plot if desired
 
 # ---- Top row (A, B) ----
@@ -798,6 +798,14 @@ library(RColorBrewer)
 library(scales)
 library(cowplot)
 
+library(grid)
+
+
+setwd("/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Data")
+Hard_corals_plot<-read.csv('Hard_corals_plot.csv',header=TRUE, stringsAsFactors = TRUE)
+str(Hard_corals_plot) 
+
+
 ## ---- Data prep ----
 Hard_corals_plot$Depth <- as.factor(Hard_corals_plot$Depth)
 
@@ -825,98 +833,500 @@ color_palette <- colorRampPalette(brewer.pal(12, "Paired"))(num_colors)
 depth_levels <- levels(Hard_corals_plot_long$Depth)
 Hard_corals_depth$Depth <- factor(Hard_corals_depth$Depth, levels = depth_levels)
 
-## ---- Base plot (BY DEPTH ONLY) ----
-HC_plot <- ggplot(Hard_corals_depth, aes(x = Percentage, y = Depth, fill = Category)) +
-  geom_bar(stat = "identity", position = "fill", width = 0.6) +
-  scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  scale_x_reverse() +   # ⬅️ HIGH VALUES ON THE LEFT
-  scale_y_discrete(limits = rev(depth_levels)) +
-  scale_fill_manual(values = color_palette) +
-  theme_bw() +
-  labs(x = "Percentage", y = "Depth (m)", fill = NULL) +
-  theme(
-    axis.title.x = element_text(size = 12, colour = "black"),
-    axis.title.y = element_text(size = 12, colour = "black"),
-    axis.text.x  = element_text(size = 12),
-    axis.text.y  = element_text(size = 12),
-    
-    legend.position  = "bottom",
-    legend.direction = "horizontal",
-    legend.title = element_blank(),
-    legend.text  = element_text(size = 12)
+
+
+## ---- Publication-optimized HC stacked bar (legend included, no cowplot) ----
+library(ggplot2)
+library(scales)
+library(grid)   # for unit()
+
+HC_plot_pub <- ggplot(Hard_corals_depth, aes(x = Percentage, y = Depth, fill = Category)) +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    width = 0.7,
+    color = "black",
+    linewidth = 0.2
   ) +
-  guides(fill = guide_legend(ncol = 12, byrow = TRUE))
+  scale_x_reverse(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0.01, 0.01))) +
+  scale_y_discrete(limits = rev(depth_levels), expand = expansion(add = c(0.2, 0.2))) +
+  scale_fill_manual(values = color_palette) +
+  labs(x = "Percentage", y = "Depth (m)", fill = NULL) +
+  theme_bw(base_size = 12) +
+  theme(
+    # Axes
+    axis.title.x = element_text(size = 12, colour = "black", margin = margin(t = 6)),
+    axis.title.y = element_text(size = 12, colour = "black", margin = margin(r = 6)),
+    axis.text.x  = element_text(size = 11),
+    axis.text.y  = element_text(size = 11),
+    
+    # Panel
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor   = element_blank(),
+    
+    # Legend (bottom, wrapped, with safe spacing)
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.box = "horizontal",
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(0.38, "cm"),
+    legend.spacing.x = unit(0.25, "cm"),
+    legend.margin = margin(t = 6, b = 2),
+    
+    # Critical: ensure legend never overlaps axis / plot
+    plot.margin = margin(t = 8, r = 10, b = 12, l = 10)
+  ) +
+  guides(fill = guide_legend(ncol = 5, byrow = TRUE))
 
-## ---- Extract legend robustly ----
-leg_list <- get_plot_component(HC_plot, "guide-box", return_all = TRUE)
+print(HC_plot_pub)
 
-legend_grob <- NULL
-for (g in leg_list) {
-  if (!is.null(g) && inherits(g, "grob") &&
-      !is.null(g$grobs) && length(g$grobs) > 0) {
-    legend_grob <- g
-    break
-  }
-}
-if (is.null(legend_grob)) legend_grob <- leg_list[[length(leg_list)]]
-
-legend_plot <- cowplot::ggdraw() + cowplot::draw_grob(legend_grob)
-
-## ---- Main plot without legend ----
-HC_plot_no_legend <- HC_plot + theme(legend.position = "none")
-
-## ---- Optional: preview ----
-print(HC_plot_no_legend)
-grid.newpage(); grid.draw(legend_grob)   # preview legend grob
-print(legend_plot)                       # preview legend plot
-
-
-## ---- Output folder
-output_dir <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
-
-## ---- Save PDFs ----
-
-# 1) Main plot: single journal column (narrow)
+## ---- Save (single combined figure) ----
+ggsave(
+  filename = file.path(output_dir, "HardCorals_stacked_byDepth_pub.png"),
+  plot = HC_plot_pub,
+  width = 7,
+  height = 6.5,
+  dpi = 300,
+  bg = "white"
+)
 
 ggsave(
-  filename = file.path(output_path, "HardCorals_main_single_column.png"),
-  plot =HC_plot_no_legend,
-  width = 5,
+  filename = file.path(output_dir, "HardCorals_stacked_byDepth_pub.pdf"),
+  plot = HC_plot_pub,
+  width = 7,
+  height = 6.5,
+  bg = "white"
+)
+
+############# HARD CORALS composition:
+
+### prepare data frame with only counts of hard corals
+str(data_all)
+
+Hard_corals_all <- data_all[data_all$GROUP == "Hard Coral", -c(6)]
+str(Hard_corals_all)
+
+Hard_corals_image <- aggregate(Count ~ PIC + SITE + DEPTH + LABEL_corrected,
+                               data = Hard_corals_all,
+                               FUN = "sum")
+str(Hard_corals_image)
+
+# Optional export
+write.csv(Hard_corals_image,
+          "Hard_corals_image.csv",
+          row.names = FALSE)
+
+Hard_corals_image_wide <- as.data.frame(
+  Hard_corals_image[, c(1,4,5)] %>%
+    pivot_wider(names_from = LABEL_corrected,
+                values_from = Count,
+                values_fill = 0)
+)
+
+row.names(Hard_corals_image_wide) <- Hard_corals_image_wide$PIC
+Hard_corals_image_wide <- as.data.frame(t(Hard_corals_image_wide[,-1]))
+str(Hard_corals_image_wide)
+
+### count number of hard coral observations per image
+ord <- as.vector(metadata$PIC)
+Hard_corals_image_wide <- Hard_corals_image_wide[, ord]
+
+metadata$HC_counts <- colSums(Hard_corals_image_wide)
+
+### IMPORTANT: Make sure DEPTH is factor (ordered if needed)
+metadata$DEPTH <- as.factor(metadata$DEPTH)
+
+str(metadata)
+### density plot by depth
+
+
+
+density_plot <- ggplot(metadata,
+                       aes(x = HC_counts, fill = DEPTH)) +
+  geom_density(alpha = 0.6, color = "black") +
+  theme_bw() +
+  labs(x = "HC_observations_per_image",
+       y = "Density",
+       fill = "Depth") +
+  theme(
+    axis.title.x = element_text(colour = "Black", size = 14),
+    axis.title.y = element_text(colour = "Black", size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+print(density_plot)
+
+output_dir <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
+ggsave(
+  filename = file.path(output_dir, "HardCorals_density_by_depth.png"),
+  plot = density_plot,
+  width = 7,
   height = 5,
   dpi = 300,
   bg = "white"
 )
 
 ggsave(
-  filename = file.path(output_path, "HardCorals_main_single_column.pdf"),
-  plot = HC_plot_no_legend,
+  filename = file.path(output_dir, "HardCorals_density_by_depth.pdf"),
+  plot = density_plot,
   width = 7,
   height = 5
 )
 
-# 2) Legend only: landscape (wide + short)
+########### Hard corals Alpha and beta diversity statistics:
 
+## ---- Packages ----
+library(tidyverse)
+library(vegan)
+library(dplyr)
+
+## ---- 1) Build community matrix: samples (PIC) x taxa ----
+# You currently have Hard_corals_image_wide as taxa x PIC
+# Convert to PIC x taxa and align to metadata
+
+comm_pic_taxa <- as.data.frame(t(Hard_corals_image_wide))  # now rows = PIC, cols = taxa
+comm_pic_taxa$PIC <- rownames(comm_pic_taxa)
+
+# Keep only samples present in metadata
+comm_pic_taxa <- comm_pic_taxa %>%
+  semi_join(metadata %>% dplyr::select(PIC, DEPTH), by = "PIC") %>%
+  arrange(match(PIC, metadata$PIC))
+
+# Turn into matrix with rownames = PIC
+comm_mat <- as.matrix(comm_pic_taxa[, setdiff(names(comm_pic_taxa), "PIC")])
+rownames(comm_mat) <- comm_pic_taxa$PIC
+storage.mode(comm_mat) <- "numeric"
+
+# Make sure numeric
+storage.mode(comm_mat) <- "numeric"
+
+# Metadata aligned to comm_mat
+meta2 <- metadata %>%
+  dplyr::select(PIC, DEPTH, SITE) %>%
+  dplyr::filter(PIC %in% rownames(comm_mat)) %>%
+  dplyr::arrange(match(PIC, rownames(comm_mat)))
+
+meta2$DEPTH <- as.factor(meta2$DEPTH)
+
+
+
+## ---- 2) ALPHA diversity per image ----
+alpha_df <- data.frame(
+  PIC = rownames(comm_mat),
+  Richness = specnumber(comm_mat),
+  Shannon  = diversity(comm_mat, index = "shannon"),
+  Simpson  = diversity(comm_mat, index = "simpson")
+) %>%
+  dplyr::left_join(meta2 %>% dplyr::select(PIC, DEPTH), by = "PIC")
+
+# Summaries by depth (mean ± SE)
+alpha_summary <- alpha_df %>%
+  pivot_longer(cols = c(Richness, Shannon, Simpson),
+               names_to = "Metric", values_to = "Value") %>%
+  group_by(DEPTH, Metric) %>%
+  summarise(
+    mean = mean(Value, na.rm = TRUE),
+    se   = sd(Value, na.rm = TRUE) / sqrt(sum(!is.na(Value))),
+    .groups = "drop"
+  )
+
+print(alpha_summary)
+output_dir <- "/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output"
+
+readr::write_csv(
+  alpha_summary,
+  file.path(output_dir, "HardCorals_alpha_diversity_by_depth.csv")
+)
+
+## ---- 2a) Plot alpha diversity by depth (boxplots) ----
+alpha_long <- alpha_df %>%
+  pivot_longer(cols = c(Richness, Shannon, Simpson),
+               names_to = "Metric", values_to = "Value")
+
+p_alpha <- ggplot(alpha_long, aes(x = DEPTH, y = Value, color = DEPTH)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.25, linewidth = 0.4) +
+  geom_point(position = position_jitter(width = 0.18),
+             size = 1.1, alpha = 0.6) +
+  facet_wrap(~Metric, scales = "free_y", nrow = 1) +
+  scale_color_viridis_d(option = "H") +
+  theme_bw() +
+  labs(x = "Depth", y = "Alpha diversity") +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(), 
+    axis.title = element_text(size = 16),   # axis titles
+    axis.text  = element_text(size = 14)    # axis tick labels
+  )+
+  guides(color = "none")
+
+print(p_alpha)
 
 ggsave(
-  filename = file.path(output_path, "HardCorals_legend_landscape.png"),
-  plot =legend_grob,
-  width = 12,
+  filename = file.path(output_dir, "HardCorals_alpha_diversity_by_depth.png"),
+  plot = p_alpha,
+  width = 8,
+  height = 4,
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  filename = file.path(output_dir, "HardCorals_alpha_diversity_by_depth.pdf"),
+  plot = p_alpha,
+  width = 8,
+  height = 4
+)
+
+
+############# ALPHA DIVERSITY STATISTICAL TESTS #############
+
+library(car)
+library(FSA)
+
+# Make sure DEPTH is factor
+alpha_df$DEPTH <- as.factor(alpha_df$DEPTH)
+
+#############################
+# 1) Check assumptions
+#############################
+
+# Normality (Shapiro per depth)
+by(alpha_df$Richness, alpha_df$DEPTH, shapiro.test)
+by(alpha_df$Shannon,  alpha_df$DEPTH, shapiro.test)
+by(alpha_df$Simpson,  alpha_df$DEPTH, shapiro.test)
+
+# Homogeneity of variance (Levene)
+leveneTest(Richness ~ DEPTH, data = alpha_df)
+leveneTest(Shannon  ~ DEPTH, data = alpha_df)
+leveneTest(Simpson  ~ DEPTH, data = alpha_df)
+
+#############################
+# 2) Kruskal–Wallis tests (robust choice)
+#############################
+
+kw_rich <- kruskal.test(Richness ~ DEPTH, data = alpha_df)
+kw_shan <- kruskal.test(Shannon  ~ DEPTH, data = alpha_df)
+kw_simp <- kruskal.test(Simpson  ~ DEPTH, data = alpha_df)
+
+print(kw_rich)
+print(kw_shan)
+print(kw_simp)
+
+#############################
+# 3) Post hoc Dunn test (if significant)
+#############################
+
+dunn_rich <- dunnTest(Richness ~ DEPTH, data = alpha_df, method = "bh")
+dunn_shan <- dunnTest(Shannon  ~ DEPTH, data = alpha_df, method = "bh")
+dunn_simp <- dunnTest(Simpson  ~ DEPTH, data = alpha_df, method = "bh")
+
+print(dunn_rich)
+print(dunn_shan)
+print(dunn_simp)
+
+write.csv(
+  dunn_rich$res,
+  file = file.path(output_dir, "HardCorals_alpha_posthoc_Richness.csv"),
+  row.names = FALSE
+)
+write.csv(
+  dunn_shan$res,
+  file = file.path(output_dir, "HardCorals_alpha_posthoc_Shannon.csv"),
+  row.names = FALSE
+)
+write.csv(
+  dunn_simp$res,
+  file = file.path(output_dir, "HardCorals_alpha_posthoc_Simpson.csv"),
+  row.names = FALSE
+)
+
+
+## ---- 3) BETA diversity by depth (Bray-Curtis) ----
+# Bray-Curtis on counts
+bray <- vegdist(comm_mat, method = "bray")
+
+# PERMANOVA: does community differ by depth?
+adon_depth <- adonis2(bray ~ DEPTH, data = meta2, permutations = 999)
+print(adon_depth)
+
+# Check dispersion (PERMANOVA can be influenced by different within-group spread)
+bd <- betadisper(bray, group = meta2$DEPTH)
+print(anova(bd))
+print(permutest(bd, permutations = 999))
+
+## ---- 3a) Ordination (PCoA) colored by depth ----
+pcoa <- cmdscale(bray, k = 2, eig = TRUE)
+
+ord_df <- data.frame(
+  PIC = rownames(comm_mat),
+  Axis1 = pcoa$points[,1],
+  Axis2 = pcoa$points[,2]
+) %>%
+  dplyr::left_join(meta2 %>% dplyr::select(PIC, DEPTH), by = "PIC")
+
+p_beta <- ggplot(ord_df, aes(x = Axis1, y = Axis2, color = DEPTH)) +
+  geom_point(size = 1.6, alpha = 0.8) +
+  stat_ellipse(type = "t", linetype = 1) +
+  scale_color_viridis_d(option = "H") +
+  coord_equal() +
+  theme_bw() +
+  labs(x = "PCoA 1", y = "PCoA 2") +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(), 
+    axis.title = element_text(size = 16),   # axis titles
+    axis.text  = element_text(size = 14)    # axis tick labels
+  )
+
+print(p_beta)
+
+ggsave(
+  filename = file.path(output_dir, "HardCorals_beta_diversity_PCoA_by_depth.png"),
+  plot = p_beta,
+  width = 6,
   height = 5,
   dpi = 300,
   bg = "white"
 )
 
 ggsave(
-  filename = file.path(output_path, "HardCorals_legend_landscape.pdf"),
-  plot = legend_grob,
-  width = 12,
+  filename = file.path(output_dir, "HardCorals_beta_diversity_PCoA_by_depth.pdf"),
+  plot = p_beta,
+  width = 6,
   height = 5
 )
+############# NMDS Calculate & plot for HARD CORALS (BY DEPTH ONLY)
+
+library(vegan)
+library(ggplot2)
+library(viridis)
+
+## ---- 0) Community matrix preparation ----
+# Hard_corals_image_wide is taxa x PIC (from your earlier code)
+# Convert to samples (PIC) x taxa for vegan
+comm_mat <- t(Hard_corals_image_wide)
+
+# Ensure numeric
+comm_mat <- apply(comm_mat, 2, as.numeric)
+rownames(comm_mat) <- colnames(Hard_corals_image_wide)
+
+# Optional: remove taxa with all zeros (helps NMDS stability)
+comm_mat <- comm_mat[, colSums(comm_mat) > 0, drop = FALSE]
+
+## ---- 1) NMDS (recommended for count/abundance data: Bray-Curtis) ----
+HC_NMDS <- metaMDS(
+  comm_mat,
+  k = 3,
+  try = 100,
+  trymax = 100,
+  distance = "bray",
+  autotransform = FALSE
+)
+
+HC_NMDS$stress
+
+## ---- 2) Combine NMDS scores with metadata ----
+metadata_HC_nmds <- cbind(metadata, HC_NMDS$points)
+metadata_HC_nmds$DEPTH <- as.factor(metadata_HC_nmds$DEPTH)
+
+## ---- 3) Plot NMDS1 vs NMDS2 (color by DEPTH only) ----
+p_nmds_12 <- ggplot(metadata_HC_nmds,
+                    aes(x = MDS1, y = MDS2, color = DEPTH)) +
+  geom_point(size = 2.0, alpha = 0.85) +
+  stat_ellipse(aes(group = DEPTH),
+               type = "t",        # multivariate t-distribution (recommended)
+               level = 0.95,      # 95% CI
+               linewidth = 0.9) +
+  scale_color_viridis_d(option = "H") +
+  coord_equal() +
+  theme_bw() +
+  labs(x = "NMDS1",
+       y = "NMDS2",
+       color = "Depth") +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(), 
+    axis.title = element_text(size = 16),   # axis titles
+    axis.text  = element_text(size = 14)    # axis tick labels
+  )
+
+
+print(p_nmds_12)
+
+## ---- 4) Plot NMDS1 vs NMDS3 (color by DEPTH only) ----
+p_nmds_13 <- ggplot(metadata_HC_nmds, aes(x = MDS1, y = MDS3)) +
+  geom_point(aes(color = DEPTH), size = 5, alpha = 0.85) +
+  scale_color_viridis(option = "H", discrete = TRUE) +
+  theme_bw() +
+  labs(x = "NMDS1", y = "NMDS3", color = "Depth") +
+  theme(
+    axis.title.x = element_text(colour = "Black", size = 14),
+    axis.title.y = element_text(colour = "Black", size = 14),
+    axis.text.x  = element_text(size = 12),
+    axis.text.y  = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 14),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+print(p_nmds_13)
+
+## ---- 5) Optional: save to your output directory ----
+# Make sure output_dir exists (you already created it earlier)
+ggsave(file.path(output_dir, "HardCorals_NMDS1_NMDS2_byDepth.png"),
+       p_nmds_12, width = 6, height = 5, dpi = 300, bg = "white")
+ggsave(file.path(output_dir, "HardCorals_NMDS1_NMDS2_byDepth.pdf"),
+       p_nmds_12, width = 6, height = 5)
+
+ggsave(file.path(output_dir, "HardCorals_NMDS1_NMDS3_byDepth.png"),
+       p_nmds_13, width = 6, height = 5, dpi = 300, bg = "white")
+ggsave(file.path(output_dir, "HardCorals_NMDS1_NMDS3_byDepth.pdf"),
+       p_nmds_13, width = 6, height = 5)
+
+## ---- Combine A (Alpha), B (Beta), C (NMDS) into one figure ----
+library(patchwork)
+library(viridis)
+
+p_beta <- p_beta + guides(color = "none") + theme(legend.position = "none")
+
+p_nmds_12 <- p_nmds_12 +
+  guides(color = guide_legend(override.aes = list(size = 3)))
+
+bottom_row <- p_beta | p_nmds_12
+
+ABC_plot <- (p_alpha / bottom_row) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", heights = c(1.05, 1)) &
+  theme(legend.position = "bottom")
+
+print(ABC_plot)
 
 
 
+# Save to the same output directory
+ggsave(
+  filename = file.path(output_dir, "HardCorals_Alpha_Beta_NMDS_clean.png"),
+  plot = ABC_plot,
+  width = 10,
+  height = 9,
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  filename = file.path(output_dir, "HardCorals_Alpha_Beta_NMDS_clean.pdf"),
+  plot = ABC_plot,
+  width = 10,
+  height = 9
+)
 
 
 #### Heat map of 7 corals with preferred order of corals & depth
@@ -1115,3 +1525,5 @@ str(HC_LDM_res_t)
 
 
 write.csv(HC_LDM_res_t,"/Users/talimass/Documents/Documents - MacBook Pro/GitHub/Coral-communities-along-the-depth-gradient-in-the-Red-Sea-reefs-of-Eilat/Reanalysis/Output/HC_LDM_res_t.csv")
+
+
