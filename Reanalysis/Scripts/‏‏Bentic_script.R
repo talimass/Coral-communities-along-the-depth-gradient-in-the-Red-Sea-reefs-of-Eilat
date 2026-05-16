@@ -1147,41 +1147,66 @@ write.csv(
 
 
 ## ---- 3) BETA diversity by depth (Bray-Curtis) ----
-# Bray-Curtis on counts
+
+library(vegan)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+
+# Bray-Curtis distance on counts
 bray <- vegdist(comm_mat, method = "bray")
 
-# PERMANOVA: does community differ by depth?
+# PERMANOVA: does community composition differ by depth?
 adon_depth <- adonis2(bray ~ DEPTH, data = meta2, permutations = 999)
 print(adon_depth)
 
-# Check dispersion (PERMANOVA can be influenced by different within-group spread)
+# Check dispersion
 bd <- betadisper(bray, group = meta2$DEPTH)
 print(anova(bd))
 print(permutest(bd, permutations = 999))
 
-## ---- 3a) Ordination (PCoA) colored by depth ----
+## ---- 3a) PCoA ordination colored by depth ----
+
+# PCoA
 pcoa <- cmdscale(bray, k = 2, eig = TRUE)
 
+# Percent variance explained
+eig_vals <- pcoa$eig
+eig_vals_pos <- eig_vals[eig_vals > 0]
+
+var_exp <- eig_vals_pos / sum(eig_vals_pos) * 100
+
+x_lab <- paste0("PCoA 1 (", round(var_exp[1], 1), "%)")
+y_lab <- paste0("PCoA 2 (", round(var_exp[2], 1), "%)")
+
+# Ordination dataframe
 ord_df <- data.frame(
   PIC = rownames(comm_mat),
-  Axis1 = pcoa$points[,1],
-  Axis2 = pcoa$points[,2]
+  Axis1 = pcoa$points[, 1],
+  Axis2 = pcoa$points[, 2]
 ) %>%
-  dplyr::left_join(meta2 %>% dplyr::select(PIC, DEPTH), by = "PIC")
+  dplyr::left_join(
+    dplyr::select(meta2, PIC, DEPTH),
+    by = "PIC"
+  )
 
+# Plot
 p_beta <- ggplot(ord_df, aes(x = Axis1, y = Axis2, color = DEPTH)) +
   geom_point(size = 1.6, alpha = 0.8) +
   stat_ellipse(type = "t", linetype = 1) +
-  scale_color_viridis_d(option = "H") +
+  scale_color_viridis_d(option = "H", name = "Depth") +
   coord_equal() +
   theme_bw() +
-  labs(x = "PCoA 1", y = "PCoA 2") +
+  labs(
+    x = x_lab,
+    y = y_lab
+  ) +
   theme(
-    legend.position = "none",
+    legend.position = "right",
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(), 
-    axis.title = element_text(size = 16),   # axis titles
-    axis.text  = element_text(size = 14)    # axis tick labels
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14)
   )
 
 print(p_beta)
@@ -1307,14 +1332,36 @@ ABC_plot <- (p_alpha / bottom_row) +
   plot_layout(guides = "collect", heights = c(1.05, 1)) &
   theme(legend.position = "bottom")
 
-print(ABC_plot)
+print(AB_plot)
+
+## ---- Combine A (Alpha), B (Beta) into one figure ----
+  
+p_alpha <- p_alpha + theme(legend.position = "none")
+
+AB_plot <- (p_alpha / p_beta) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", heights = c(1, 1.6)) &
+  theme(legend.position = "bottom")
+
+print(AB_plot)
 
 
+library(grid)
+
+AB_plot <- (wrap_elements(p_alpha) / p_beta) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(
+    heights = unit(c(7, 6), c("cm", "cm")),  # fixed sizes
+    guides = "collect"
+  ) &
+  theme(legend.position = "bottom")
+
+print(AB_plot)
 
 # Save to the same output directory
 ggsave(
   filename = file.path(output_dir, "HardCorals_Alpha_Beta_NMDS_clean.png"),
-  plot = ABC_plot,
+  plot = AB_plot,
   width = 10,
   height = 9,
   dpi = 300,
@@ -1323,7 +1370,7 @@ ggsave(
 
 ggsave(
   filename = file.path(output_dir, "HardCorals_Alpha_Beta_NMDS_clean.pdf"),
-  plot = ABC_plot,
+  plot = AB_plot,
   width = 10,
   height = 9
 )
